@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Chase Game</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+    body {
+        margin: 0;
+        background: #0f172a;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        font-family: Arial, sans-serif;
+        color: white;
+    }
+
+    canvas {
+        background: #020617;
+        border: 3px solid #38bdf8;
+        border-radius: 10px;
+    }
+
+    .info {
+        position: absolute;
+        top: 20px;
+        font-size: 18px;
+    }
+</style>
+</head>
+
+<body>
+
+<div class="info">Score: <span id="score">0</span></div>
+<canvas id="game" width="400" height="400"></canvas>
+
+<script>
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+
+let score = 0;
+let gameOver = false;
+
+const player = {
+    x: 200,
+    y: 200,
+    size: 15,
+    speed: 4
+};
+
+const enemy = {
+    x: 50,
+    y: 50,
+    size: 15,
+    speed: 2
+};
+
+const keys = {};
+
+document.addEventListener("keydown", e => keys[e.key] = true);
+document.addEventListener("keyup", e => keys[e.key] = false);
+
+function movePlayer() {
+    if (keys["ArrowUp"] || keys["w"]) player.y -= player.speed;
+    if (keys["ArrowDown"] || keys["s"]) player.y += player.speed;
+    if (keys["ArrowLeft"] || keys["a"]) player.x -= player.speed;
+    if (keys["ArrowRight"] || keys["d"]) player.x += player.speed;
+
+    player.x = Math.max(0, Math.min(canvas.width - player.size, player.x));
+    player.y = Math.max(0, Math.min(canvas.height - player.size, player.y));
+}
+
+function moveEnemy() {
+    if (enemy.x < player.x) enemy.x += enemy.speed;
+    if (enemy.x > player.x) enemy.x -= enemy.speed;
+    if (enemy.y < player.y) enemy.y += enemy.speed;
+    if (enemy.y > player.y) enemy.y -= enemy.speed;
+}
+
+function checkCollision() {
+    const dx = player.x - enemy.x;
+    const dy = player.y - enemy.y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+
+    if (distance < player.size) {
+        gameOver = true;
+    }
+}
+
+function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Player
+    ctx.fillStyle = "#38bdf8";
+    ctx.fillRect(player.x, player.y, player.size, player.size);
+
+    // Enemy
+    ctx.fillStyle = "#ef4444";
+    ctx.fillRect(enemy.x, enemy.y, enemy.size, enemy.size);
+}
+
+function updateScore() {
+    if (!gameOver) {
+        score++;
+        document.getElementById("score").innerText = score;
+    }
+}
+
+function gameLoop() {
+    if (gameOver) {
+        alert("Game Over! Your Score: " + score);
+        location.reload();
+        return;
+    }
+
+    movePlayer();
+    moveEnemy();
+    checkCollision();
+    draw();
+    updateScore();
+
+    requestAnimationFrame(gameLoop);
+}
+
+gameLoop();
+</script>
+
+</body>
+</html>
